@@ -35,6 +35,7 @@ class EasyOCR(OCRInstance):
         kw["lang_list"] = self.lang
         kw["verbose"] = kw.get("verbose") or False
         self.readtext_kwargs = kw.get("readtext_kwargs", {})
+        del kw["readtext_kwargs"]
 
         self.reader = Reader(**kw)
 
