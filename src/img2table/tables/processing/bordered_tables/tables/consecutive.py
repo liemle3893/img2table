@@ -25,12 +25,25 @@ def merge_consecutive_tables(tables: List[Table], contours: List[Cell]) -> List[
         in_between_contours = [c for c in contours if c.y1 >= prev_table.y2 and c.y2 <= tb.y1
                                and c.x2 >= min(prev_table.x1, tb.x1)
                                and c.x1 <= max(prev_table.x2, tb.x2)]
-        # Check coherency of tables
+        
+        # Check table structure compatibility
         prev_tb_cols = sorted([l for l in prev_table.lines if l.vertical], key=lambda l: l.x1)
         tb_cols = sorted([l for l in tb.lines if l.vertical], key=lambda l: l.x1)
-        coherency_lines = all([abs(l1.x1 - l2.x1) <= 2 for l1, l2 in zip(prev_tb_cols, tb_cols)])
-
-        if not (len(in_between_contours) == 0 and prev_table.nb_columns == tb.nb_columns and coherency_lines):
+        
+        # Check if tables have similar boundaries (allowing for merged cells)
+        left_aligned = abs(prev_table.x1 - tb.x1) <= 10
+        right_aligned = abs(prev_table.x2 - tb.x2) <= 10
+        
+        # Check vertical spacing
+        vertical_spacing = tb.y1 - prev_table.y2
+        max_spacing = min(prev_table.height, tb.height) * 0.3  # Reduced from 0.5 to be more strict
+        
+        # Tables should be merged if they are aligned and close enough
+        should_merge = (len(in_between_contours) == 0 and
+                       left_aligned and right_aligned and
+                       vertical_spacing < max_spacing)
+        
+        if not should_merge:
             clusters.append([])
         clusters[-1].append(tb)
 
