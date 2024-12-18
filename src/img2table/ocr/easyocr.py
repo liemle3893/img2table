@@ -34,12 +34,13 @@ class EasyOCR(OCRInstance):
         kw = kw or {}
         kw["lang_list"] = self.lang
         kw["verbose"] = kw.get("verbose") or False
+        self.readtext_kwargs = kw.get("readtext_kwargs", {})
 
         self.reader = Reader(**kw)
 
     def content(self, document: Document) -> List[List[Tuple]]:
         # Get OCR of all images
-        ocrs = [self.reader.readtext(image) for image in document.images]
+        ocrs = [self.reader.readtext(image, **self.readtext_kwargs) for image in document.images]
 
         return ocrs
 
